@@ -31,46 +31,80 @@
 
 
 
-      select: function(start, end) {
+
+
+      select: function(start, end, color) {
+
 
         $("#modal_button").click();
         // $('#myModal').show();
         // var title = prompt('Event Title:');
 
         $("#submit").click(function(){
-          var title= $('#title').val()
+          var title= $('#title').val();
+          var color= $('#color').val();
+          console.log(title)
           
           var eventData;
           if (title) {
             eventData = {
               title: title,
               start: start,
-              end: end
+              end: end,
+              color: color,
             };
-            $('#calendar').fullCalendar('renderEvent', eventData, true); // stick? = true
+            
+            $('#calendar').fullCalendar('renderEvent', eventData, true);
+            $.ajax({
+                 type:"POST",
+                 url:"/calendar/SaveEvent/",
+                 data: {
+                        eventData // from form
+                        },
+                 success: function(){
+                     $('#message').html("<h2>Contact Form Submitted!</h2>") 
+                    }
+            });
+
+            // $("#title").val(""); // stick? = true
           }
+
+          
           title = "";
           start = '';
           end = '';
           $('#calendar').fullCalendar('unselect');
-          $('#exit').click()
+          $(document).ready(function(){
+
+            $('#exit').click();
+            $('#title').val("");
+            $('#price').val("");
+
+          });
+
+          // $("#title").val("");
+
 
         });
 
         
       },
 
-      dayRender: function ( date, cell) {
-        cell.prepend('<p style= " color:red; margin-top:-2px;">Price: 10$</p> <p style= " color: green; margin-top: 70px;"> Points: 100</p>');
-      },
+
+
+      // dayRender: function ( date, cell) {
+      //   // cell.prepend('<div class="selector"><p style= " color:red; margin-top:-2px;">Price: 10$</p> <p style= " color: green; margin-top: 70px;"> Points: 100</p></div>');
+      //   cell.prepend('<span class="selector">' + 'Price: $10' + '</span>' +'<br><span class="selector">'+ 'Points: 100' + '</span>');
+      // },
 
       eventRender: function(event, element) { 
-                if (event.notes) { 
-                    $(element).tooltip({title: event.notes});
-        element.find(".fc-title").prepend("&nbsp;&nbsp;" + "<i class='fa fa-exclamation-circle' aria-hidden='true'></i>"); 
-        }
+        if (event.notes) { 
+            $(element).tooltip({title: event.notes});
+            element.find(".fc-title").prepend("&nbsp;&nbsp;" + "<i class='fa fa-exclamation-circle' aria-hidden='true'></i>"); 
+          }
       }, 
 
+      
      
 
       editable: true,
@@ -92,6 +126,7 @@
         },
       ]
     });
+
 
   });
 
@@ -139,6 +174,13 @@
               <input type="text" name="title" id='title'>
               <label>Price</label>
               <input type="text" name="price" id="price">
+              <br><br>
+              <select id="color">
+                <option value="#800000">Red</option>
+                <option value="#737373">Grey</option>
+                <option value="#00a3aa">Blue</option>
+                <option value="#f4d300">Yellow</option>
+              </select>
               
             
           </div>

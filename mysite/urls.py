@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from mycalendar import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('calendar/', include('mycalendar.urls')),
     path('events/', include('app1.urls')),
+    path('eventsapi', views.Get_events_List.as_view()),
 ]
