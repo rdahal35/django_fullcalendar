@@ -1,29 +1,74 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Event
-from .serializers import eventSerializer
-from django.shortcuts import render_to_response
+from .models import Event, DayDetail
 from django.http import HttpResponse
+import simplejson as json
+from django.http import JsonResponse
+from django.views.generic import TemplateView
+
+from .parse import parse
+import requests
 
 # Create your views here.
 
-class Get_events_List(APIView):
-    def get(self, request):
-        events = Event.objects.all()
-        serialized = eventSerializer(events, many=True)
-        return Response(serialized.data)
 
+class SearchCalendar(TemplateView):
+	template_name= 'mycalendar/home.html'
 
 @csrf_exempt
-def CalendarView(request):		
-	return render(request, 'calendar.html')
+def CalendarView(request):
+
+	eve= []
+	if request.method== 'POST':
+		url= request.POST.get('url')
+
+		try:
+			r= requests.get(url, allow_redirects=True)
+			open('mycal.ics', 'wb').write(r.content)
+			ical_events= parse('mycal.ics')
+
+		except Exception as e:
+			ical_events=[]
+		
+	else:
+		ical_events= parse('mycal.ics') 
+
+	for event in ical_events:
+		event_sub= {}
+
+		event_sub['title']= str(event.get('summary'))
+		event_sub['start']= str(event.get('dtstart').dt)
+		event_sub['end']=  str(event.get('dtend').dt)
+		eve.append(event_sub)
+	
+	events_data = json.dumps(eve)
+
+	events= Event.objects.all()	
+	return render(request, 'calendar.html', {'events': events, 'ical_events': eve})
+
+
+def PriceCalendar(request):
+	details= DayDetail.objects.all()
+	return render(request, 'mycalendar/price_calendar.html', { 'details': details })
 
 def saveEvent(request):
 	if request.is_ajax():
 		message= "Yes I am here"
-		print(eventdata)
+		eventData = request.GET.get('eventData', None)
+		data = json.loads(eventData)
+		Event.objects.create(title=data['title'], start_date=data['start'], end_date= data['end'], color=data['color'])
 	else:
 		message= " Not ajax"
-	return HttpResponse(message)
+	return JsonResponse(data)
+
+def saveDayDetail(request):
+	if request.is_ajax():
+		message=" happy "
+		detail_json= request.GET.get('detail', None)
+		detail= json.loads(detail_json)
+		DayDetail.objects.create(date=detail['date'], price=detail['price'], points=detail['point'])
+	else: 
+		message=" Not ajax "
+	return JsonResponse(detail)
+

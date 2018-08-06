@@ -41,7 +41,6 @@ INSTALLED_APPS = [
 
 
     'mycalendar',
-    'app1',
 ]
 
 MIDDLEWARE = [

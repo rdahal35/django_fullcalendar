@@ -20,6 +20,5 @@ from mycalendar import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('calendar/', include('mycalendar.urls')),
-    path('events/', include('app1.urls')),
-    path('eventsapi', views.Get_events_List.as_view()),
+    # path('eventsapi', views.Get_events_List.as_view()),
 ]

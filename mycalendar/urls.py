@@ -3,6 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.CalendarView, name='calendar'),
-    path('SaveEvent/', views.saveEvent, name='event_save')
+    path('priceCalendar/', views.PriceCalendar, name='price_calendar'),
+    path('SearchCalendar/', views.SearchCalendar.as_view(), name='search_calendar'),
+    path('SaveEvent/', views.saveEvent, name='event_save'),
+    path('SaveDetail/', views.saveDayDetail, name='save_detail'),
     
 ]

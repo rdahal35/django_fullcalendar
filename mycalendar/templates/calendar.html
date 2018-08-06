@@ -17,7 +17,10 @@
 
   $(document).ready(function() {
 
-    $('#calendar').fullCalendar({
+var sundayRate='idontknow';
+
+    $('#event_calendar').fullCalendar({
+      
       header: {
         left: 'prev,next today',
         center: 'title',
@@ -27,24 +30,18 @@
       navLinks: true, // can click day/week names to navigate views
       selectable: true,
       selectHelper: true,
-      eventBackground: 'transparent',
 
-
-
-
-
-      select: function(start, end, color) {
-
-
+      select: function(start, end, color, allday) {
+          
         $("#modal_button").click();
         // $('#myModal').show();
         // var title = prompt('Event Title:');
 
+      
         $("#submit").click(function(){
           var title= $('#title').val();
-          var color= $('#color').val();
-          console.log(title)
-          
+          var color= $('#color').val();        
+         
           var eventData;
           if (title) {
             eventData = {
@@ -52,28 +49,32 @@
               start: start,
               end: end,
               color: color,
+              // allday: allday,
             };
             
-            $('#calendar').fullCalendar('renderEvent', eventData, true);
-            $.ajax({
-                 type:"POST",
-                 url:"/calendar/SaveEvent/",
-                 data: {
-                        eventData // from form
-                        },
-                 success: function(){
-                     $('#message').html("<h2>Contact Form Submitted!</h2>") 
-                    }
-            });
-
+            $('#event_calendar').fullCalendar('renderEvent', eventData, true);
             // $("#title").val(""); // stick? = true
           }
+
+          $.ajax({
+              url: "{% url 'event_save'%}",
+              data: {
+                'eventData': JSON.stringify(eventData)
+              },
+              dataType: 'json',
+              success: function (data) {
+                if (data) {
+                  alert("Event added sucess");
+                }
+              }
+            });
+
 
           
           title = "";
           start = '';
           end = '';
-          $('#calendar').fullCalendar('unselect');
+          $('#price_calendar').fullCalendar('unselect');
           $(document).ready(function(){
 
             $('#exit').click();
@@ -82,30 +83,11 @@
 
           });
 
-          // $("#title").val("");
-
-
         });
+      
 
         
-      },
-
-
-
-      // dayRender: function ( date, cell) {
-      //   // cell.prepend('<div class="selector"><p style= " color:red; margin-top:-2px;">Price: 10$</p> <p style= " color: green; margin-top: 70px;"> Points: 100</p></div>');
-      //   cell.prepend('<span class="selector">' + 'Price: $10' + '</span>' +'<br><span class="selector">'+ 'Points: 100' + '</span>');
-      // },
-
-      eventRender: function(event, element) { 
-        if (event.notes) { 
-            $(element).tooltip({title: event.notes});
-            element.find(".fc-title").prepend("&nbsp;&nbsp;" + "<i class='fa fa-exclamation-circle' aria-hidden='true'></i>"); 
-          }
-      }, 
-
-      
-     
+      },     
 
       editable: true,
       eventLimit: true, // allow "more" link when too many events
@@ -113,24 +95,36 @@
         {% for event in events %}
           {
             title: '{{ event.title }}',
-            start: '{{ event.start  }}',
-            end: '{{ event.end }}',
+            start: '{{ event.start_date  }}',
+            end: '{{ event.end_date }}',
+            color: '{{ event.color }}'
           },
 
         {% endfor%}
+
+        {% for event in ical_events %}
+          {
+            title: '{{ event.title }}',
+            start: '{{ event.start }}',
+            end: '{{ event.end }}',
+            color: '#998899',
+          },
+
+        {% endfor %}
 
         {
           title: 'Going Home',
           start: '2018-07-30',
           end: '2018-08-01'
         },
-      ]
+      ],
+      
     });
-
 
   });
 
 </script>
+
 <style>
 
   body {
@@ -140,17 +134,19 @@
     font-size: 14px;
   }
 
-  #calendar {
+  #event_calendar {
     max-width: 900px;
     margin: 0 auto;
+    float: left;
   }
+
 
 </style>
 </head>
 <body>
 
-  <div id='calendar'></div>
-  <br>
+  <div id='event_calendar'></div>
+
   
 
   <div class="container">
@@ -194,6 +190,7 @@
     </div>
     
   </div>
+
 
 
 </body>

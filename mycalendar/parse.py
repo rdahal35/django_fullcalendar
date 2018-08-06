@@ -20,4 +20,3 @@ def parse(filename):
 #for event in events:
  #   print('This is a event')
   #  print(event['SUMMARY'])
-
