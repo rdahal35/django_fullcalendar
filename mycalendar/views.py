@@ -67,7 +67,13 @@ def saveDayDetail(request):
 		message=" happy "
 		detail_json= request.GET.get('detail', None)
 		detail= json.loads(detail_json)
-		DayDetail.objects.create(date=detail['date'], price=detail['price'], points=detail['point'])
+		try:
+			det= DayDetail.objects.get(id=detail['id'])
+			det.price= detail['price']
+			det.points= detail['point']
+			det.save()
+		except DayDetail.DoesNotExist:
+			DayDetail.objects.create(id=detail['id'], date=detail['date'], price=detail['price'], points=detail['point'])
 	else: 
 		message=" Not ajax "
 	return JsonResponse(detail)

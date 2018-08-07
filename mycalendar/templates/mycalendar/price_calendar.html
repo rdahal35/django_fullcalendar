@@ -7,9 +7,10 @@
 
   <link href='{% static "css/fullcalendar.min.css" %}' rel='stylesheet' />
   <link href='{% static "css/fullcalendar.print.min.css" %}' rel='stylesheet' media='print' />
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
   <script src='{% static "js/lib/moment.min.js" %}'></script>
   <script src='{% static "js/lib/jquery.min.js" %}'></script>
   <script src='{% static "js/fullcalendar.js" %}'></script>
@@ -28,7 +29,10 @@
       defaultDate: new Date(),
       navLinks: true, // can click day/week names to navigate views
 
-      dayClick: function(date, allday) {
+      dayClick: function(date, allday, ind) {
+        // var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
+        var id="Dtl"+date;
+        console.log(id)
         $("#pricemodal_button").click();
         // var title = prompt("Provide Event Title");
 
@@ -37,7 +41,8 @@
           var point= $('#point').val(); 
           if (price) {
             eventData = {
-              title: 'Price: ' + price +'$',
+              id:id,
+              title: 'Price:' + price +'$',
               start: date,
               allday: true,
               editable: false,
@@ -45,20 +50,20 @@
               color: '#ffffff',
               description: point,
               // rendering: 'background',
-            };
+            };            
+            $('#price_calendar').fullCalendar('renderEvent', eventData, true);
             detail = {
+                id: id,
                 date: date,
                 price: price,
                 point: point,
-              };
-            
-            $('#price_calendar').fullCalendar('renderEvent', eventData, true);
+              };            
 
-            $.ajax({
+              $.ajax({
               url: "{% url 'save_detail' %}",
 
               data: {
-                  'detail': JSON.stringify(detail)
+                  'detail': JSON.stringify(detail),
               },
               dataType: 'json',
               success: function (data) {
@@ -66,13 +71,13 @@
                   alert("Detail added sucess");
                 }
               }
+
             });
           }
-
           
 
           
-          $('#event_calendar').fullCalendar('unselect');
+          $('#price_calendar').fullCalendar('unselect');
 
           date="";
           title = "";
@@ -92,6 +97,7 @@
         });
         
       },
+
       
 
 
@@ -105,51 +111,65 @@
       },
       events:[
 
-        {
-          title: 'Price: 10$',
-          start: '2018-08-11',
-          color: '#ffffff',
-          description: '100',
-          allday: true,
-          overlap: false,
-          dow: [ 1, 4 ],
-        },
-
          {% for detail in details %}
           {
-          title: 'Price: '+ '{{ detail.price }}' +'$',
-          start: '{{ detail.date }}',
-          color: '#ffffff',
-          description: '{{ detail.points }}',
-          allday: true,
-          overlap: false,
-          dow: [ 1, 4 ],
-        },
+            id: '{{ detail.id }}',
+            title: 'Price: '+ '{{ detail.price }}' +'$',
+            start: '{{ detail.date }}',
+            color: '#ffffff',
+            description: '{{ detail.points }}',
+            allday: true,
+            overlap: false,
+          },
 
         {% endfor%}
+        {
+          title:"Monday",
+          dow:[1] //monday
+          //start/endtime works too
+        },
       ],
 
       eventClick: function(event,  element) {
         $("#editprice_button  ").click();
-        var price= event.title
-        $('#editprice').val(price.slice(6,9));
+        var price= event.title;
+        var n = price.indexOf("$");
+        var m = price.indexOf(":");
+        $('#editprice').val(price.slice(m+1,n));
         $('#editpoint').val(event.description);
         $("#editsubmit").click(function(){
           var price= $('#editprice').val();
           var point= $('#editpoint').val();
           event.title= 'Point: '+ price +'$';
           event.description= point;
+          detail = {
+                id: event.id,
+                date: event.start,
+                price: price,
+                point: point,
+              };  
+
+          $.ajax({
+              url: "{% url 'save_detail' %}",
+
+              data: {
+                  'detail': JSON.stringify(detail),
+              },
+              dataType: 'json',
+              success: function (data) {
+                if (data) {
+                  alert("Detail updated sucess");
+                }
+              }
+
+            });
+
+
           $('#price_calendar').fullCalendar('updateEvent', event);
           $('#event_calendar').fullCalendar('unselect');
           $('#editexit').click();
           event=""
         });
-        
-        
-
-        
-        
-
         
       },
 
@@ -170,9 +190,14 @@
     float: left;
   }
   .fc-title{
+    margin-bottom: 30px;
     color: #b73303;
   }
  
+ .fc-content{
+    height: 100%;   
+
+  }
 
   .fc-event {
     position: sticky;
@@ -207,22 +232,27 @@
       
         <!-- Modal content-->
         <div class="modal-content">
+
+            <!-- Modal Header -->
           <div class="modal-header">
+            <h4 class="modal-title">Add Price and Points</h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Modal Header</h4>
           </div>
 
           <div class="modal-body">
-            
-              <label>Price:</label>
-              <input type="text" name="price" id='price'>
-              <label>Point</label>
-              <input type="text" name="point" id="point">
-              <br><br>
+
+              <div class="form-group">
+                <label>Price:</label>
+                <input type="text" name="price" id='price'>
+              </div>
+              <div class="form-group">
+                <label>Point:</label>
+                <input type="text" name="point" id="point">
+              </div>
           </div>
           <div class="modal-footer">
             <button id="exit" type="button" style= "display: none;" class="btn btn-default" data-dismiss="modal"></button>
-            <button type="submit" class="btn btn-default" id="submit">Add Event</button>
+            <button type="submit" class="btn btn-success" id="submit">Submit</button>
           </div>
         </div>
         
@@ -241,8 +271,8 @@
         <div class="modal-content">
 
           <div class="modal-header">
+            <h4 class="modal-title">Update Price and Points</h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Modal Header</h4>
           </div>
 
           <div class="modal-body">
@@ -256,7 +286,7 @@
           </div>
           <div class="modal-footer">
             <button id="editexit" type="button" style= "display: none;" class="btn btn-default" data-dismiss="modal"></button>
-            <button type="submit" class="btn btn-default" id="editsubmit">Add Event</button>
+            <button type="submit" class="btn btn-success" id="editsubmit">Update</button>
           </div>
           
         </div>

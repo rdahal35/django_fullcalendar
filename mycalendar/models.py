@@ -3,6 +3,7 @@ from django.db import models
 # Create your models here.
 
 class Event(models.Model):
+	id= models.CharField(primary_key=True, max_length=100)
 	title= models.CharField(max_length=400)
 	start_date= models.CharField(max_length=100)
 	end_date= models.CharField(max_length=100)
@@ -11,7 +12,11 @@ class Event(models.Model):
 	def __str__(self):
 		return self.title
 class DayDetail(models.Model):
+	id= models.CharField(primary_key=True, max_length=100)
 	date= models.CharField(max_length=20)
 	price= models.CharField(max_length=10)
 	points= models.CharField(max_length=10)
+
+	def __str__(self):
+		return self.date
 
