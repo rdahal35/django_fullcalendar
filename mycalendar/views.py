@@ -16,6 +16,9 @@ import requests
 class SearchCalendar(TemplateView):
 	template_name= 'mycalendar/home.html'
 
+class HostSignUp(TemplateView):
+	template_name= 'host-signup-2.html'
+
 @csrf_exempt
 def CalendarView(request):
 

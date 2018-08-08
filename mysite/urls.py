@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('calendar/', include('mycalendar.urls')),
     # path('eventsapi', views.Get_events_List.as_view()),
+    path('HostSignUp/', views.HostSignUp.as_view(), name='HostSignUp'),
 ]
