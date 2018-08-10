@@ -7,12 +7,15 @@
   <link href='{% static "css/fullcalendar.min.css" %}' rel='stylesheet' />
   <link href='{% static "css/fullcalendar.print.min.css" %}' rel='stylesheet' media='print' />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <link href='https://code.jquery.com/ui/1.12.1/themes/cupertino/jquery-ui.css' rel='stylesheet' />
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
   <script src='{% static "js/lib/moment.min.js" %}'></script>
   <script src='{% static "js/lib/jquery.min.js" %}'></script>
   <script src='{% static "js/fullcalendar.js" %}'></script>
+  <script src='{% static "js/theme-chooser.js" %}'></script>
   
   <script>
 
@@ -25,86 +28,87 @@
               }
           }
           return days;
-      } 
+      }; 
 
       $('#price_calendar').fullCalendar({
+        theme: true,
+        themeSystem: 'jquery-ui',
+        theme: "le-frog",
         header: {
           left: 'prev,next today',
           center: 'title',
           right: 'month,agendaWeek,agendaDay'
         },
-
         defaultDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
 
-        dayClick: function(date, allday) {
-          // var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
-          var id="Dtl"+date;
-          console.log(id)
-          $("#pricemodal_button").click();
-          // var title = prompt("Provide Event Title");
+        // dayClick: function(date, allday) {
+        //   // var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
+        //   var id="Dtl"+date;
+        //   $("#pricemodal_button").click();
+        //   // var title = prompt("Provide Event Title");
 
-          $("#submit").click(function(){
-            var price= $('#price').val();
-            var point= $('#point').val(); 
-            if (price) {
-              eventData = {
-                id:id,
-                title: 'Price:' + price +'$',
-                start: date,
-                allday: true,
-                editable: false,
-                overlap: false,
-                color: '#ffffff',
-                description: point,
-                // rendering: 'background',
-              };            
-              $('#price_calendar').fullCalendar('renderEvent', eventData, true);
-              detail = {
-                  id: id,
-                  date: date,
-                  price: price,
-                  point: point,
-                };            
+        //   $("#submit").click(function(){
+        //     var price= $('#price').val();
+        //     var point= $('#point').val(); 
+        //     if (price) {
+        //       eventData = {
+        //         id:id,
+        //         title: price,
+        //         start: date,
+        //         allday: true,
+        //         editable: false,
+        //         overlap: false,
+        //         color: '#ffffff',
+        //         description: point,
+        //         // rendering: 'background',
+        //       };            
+        //       // $('#price_calendar').fullCalendar('renderEvent', eventData, true);
+        //       detail = {
+        //           id: id,
+        //           date: date,
+        //           price: price,
+        //           point: point,
+        //         };            
 
-                $.ajax({
-                url: "{% url 'save_detail' %}",
+        //         $.ajax({
+        //         url: "{% url 'save_detail' %}",
 
-                data: {
-                    'detail': JSON.stringify(detail),
-                },
-                dataType: 'json',
-                success: function (data) {
-                  if (data) {
-                    alert("Detail added sucess");
-                  }
-                }
+        //         data: {
+        //             'detail': JSON.stringify(detail),
+        //         },
+        //         dataType: 'json',
+        //         success: function (data) {
+        //           if (data) {
+        //             alert("Detail added sucess");
+        //           }
+        //         }
 
-              });
-            }
+        //       });
+        //     }
             
 
             
-            $('#price_calendar').fullCalendar('unselect');
+        //     $('#price_calendar').fullCalendar('unselect');
 
-            date="";
-            title = "";
-            start = "";
-            price="";
-            point="";
-            description='';
-            $(document).ready(function(){
+        //     date="";
+        //     title = "";
+        //     start = "";
+        //     price="";
+        //     point="";
+        //     description='';
+        //     $(document).ready(function(){
 
-              $('#exit').click();
-              $('#point').val("");
-              $('#price').val("");
+        //       $('#exit').click();
+        //       $('#point').val("");
+        //       $('#price').val("");
 
-            });
+        //     });
 
 
-          });
+        //   });
           
-        },
+        // },
 
         
 
@@ -118,95 +122,23 @@
           }
         },
 
-        // events:[
+        events:[
 
-        //    {% for detail in details %}
-        //     {
-        //       id: '{{ detail.id }}',
-        //       title: 'Price: '+ '{{ detail.price }}' +'$',
-        //       start: '{{ detail.date }}',
-        //       color: '#ffffff',
-        //       description: '{{ detail.points }}',
-        //       allday: true,
-        //       overlap: false,
-        //     },
+           {% for detail in details %}
+            {
+              id: '{{ detail.id }}',
+              title: '{{ detail.price }}',
+              start: '{{ detail.date }}',
+              color: '#ffffff',
+              textColor: "#ff0000",
+              description: '{{ detail.points }}',
+              allday: true,
+              overlap: false,
+            },
 
-        //   {% endfor%}
+          {% endfor%}
 
-        // ],
-
-
-         // Fullcalendar will load sources defined here every view change.
-          eventSources: [{
-              // Every sunday as a background event
-              events: function (start, end, timezone, callback) { 
-                      // Get the days
-                      var days = matchingDaysBetween(start, end, function (day) {
-                          return day.format('dddd') === 'Sunday'; //test function
-                      });
-
-                      // Map days to events
-                      callback(days.map(function (day) { 
-                          return {
-                              start: moment(day).startOf('day'),
-                              end: moment(day).endOf('day'),
-                              title: "10",
-                              description: "100",
-                          };
-                      }));
-                  }
-              },
-              {
-              // Every tuesday noon to 2pm
-              events: function (start, end, timezone, callback) {
-                  var days = matchingDaysBetween(start, end, function (day) {
-                      return day.format('dddd') === 'Tuesday'; //test function
-                  });
-                  callback(days.map(function (day) { // map days to events
-                      return {
-                          start: moment(day).startOf('day'),
-                          end: moment(day).endOf('day'),
-                          title: "10",
-                          description: "300",
-                      };
-                  }));
-                }
-              },
-
-              {
-              // Every tuesday noon to 2pm
-              events: function (start, end, timezone, callback) {
-                  var days = matchingDaysBetween(start, end, function (day) {
-                      return day.format('dddd') === 'Saturday'; //test function
-                  });
-                  callback(days.map(function (day) { // map days to events
-                      return {
-                          start: moment(day).startOf('day'),
-                          end: moment(day).endOf('day'),
-                          title: "10",
-                          description: "300",
-                      };
-                  }));
-                }
-              },
-
-              {
-              // Every tuesday noon to 2pm
-              events: function (start, end, timezone, callback) {
-                  var days = matchingDaysBetween(start, end, function (day) {
-                      return day.format('dddd') === 'Monday'; //test function
-                  });
-                  callback(days.map(function (day) { // map days to events
-                      return {
-                          start: moment(day).startOf('day'),
-                          end: moment(day).endOf('day'),
-                          title: "20",
-                          description: "200",
-                      };
-                  }));
-                }
-              },
-          ],
+        ],
 
         eventClick: function(event,  element) {
           // alert(event._id)
@@ -224,8 +156,8 @@
             detail = {
                   id: event.id,
                   date: event.start,
-                  price: price,
-                  point: point,
+                  price: event.title,
+                  point: event.description,
                 };  
 
             $.ajax({
@@ -270,10 +202,15 @@
     });
 </script>
 <style>
+ html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+    font-size: 14px;
+  }
  #price_calendar {
-    margin: 0 auto;
-    padding: 10px;
-    float: left;
+    max-width: 900px;
+    margin: 40px auto;
   }
   .fc-title{
     margin-bottom: 30px;

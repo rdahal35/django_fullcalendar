@@ -18,6 +18,7 @@ class SearchCalendar(TemplateView):
 
 class HostSignUp(TemplateView):
 	template_name= 'host-signup-2.html'
+	# template_name= "mycalendar/themcalendar.html"
 
 @csrf_exempt
 def CalendarView(request):
@@ -65,19 +66,31 @@ def saveEvent(request):
 		message= " Not ajax"
 	return JsonResponse(data)
 
+@csrf_exempt
 def saveDayDetail(request):
+	print("hello there")
 	if request.is_ajax():
 		message=" happy "
-		detail_json= request.GET.get('detail', None)
-		detail= json.loads(detail_json)
-		try:
-			det= DayDetail.objects.get(id=detail['id'])
-			det.price= detail['price']
-			det.points= detail['point']
-			det.save()
-		except DayDetail.DoesNotExist:
-			DayDetail.objects.create(id=detail['id'], date=detail['date'], price=detail['price'], points=detail['point'])
+		detail_json= request.GET.get('details', None)
+		# print(detail_json)
+		
+		details= json.loads(detail_json)
+		for detail in details:
+			try:
+				det= DayDetail.objects.get(date=detail['date'])
+				det.price= detail['price']
+				det.points= detail['point']
+				det.save()
+			except DayDetail.DoesNotExist:
+				DayDetail.objects.create(
+						detail_id=detail['id'], 
+						date=detail['date'], 
+						price=detail['price'], 
+						points=detail['point']
+					)
+		
 	else: 
 		message=" Not ajax "
-	return JsonResponse(detail)
+	return JsonResponse(message, safe=False)
+	
 
