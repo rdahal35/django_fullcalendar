@@ -49,7 +49,7 @@
       });
 
       var matchingDaysBetween = function (start, end, test) {
-          // alert(end)
+          alert(moment())
           var days = [];
           for (var day = moment(start); day.isBefore(end); day.add(1, 'd')) {
               if (test(day)) {
@@ -58,15 +58,6 @@
           }
           return days;
       };
-      var day_obj={
-        "sunday": "Sunday",
-        "monday":"Monday",
-        "tuesday": "Tuesday",
-        "wednesday": "Wednesday",
-        "thursday": "Thursday",
-        "friday": "Friday",
-        "saturday": "Saturday"
-      }
 
       $('#price_calendar').fullCalendar({
         
@@ -84,6 +75,7 @@
         eventLimit: true, // allow "more" link when too many events
         unselectAuto: true,
         selectable: true,
+        editable : true,
 
         eventSources: [
 
@@ -101,11 +93,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -126,11 +121,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -151,11 +149,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -176,11 +177,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -201,11 +205,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -226,11 +233,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -251,11 +261,14 @@
                       callback(days.map(function (day) { 
                         return {
                             start: moment(day).startOf('day'),
-                            end: moment(day).endOf('day'),
+                            // end: moment(day).endOf('day'),
                             title: price,
                             color: '#ffffff',
                             description: point,
                             backgroundColor: '#88aa11',
+                            allday: true,
+                            editable: false,
+                            overlap: false,
                         };
                       }));                  
                   }
@@ -265,6 +278,12 @@
 
 
         ],
+
+        selectAllow: function(info) {
+            if (info.start.isBefore(moment()))
+                return false;
+            return true;          
+        },
 
         eventClick: function(event,  element) {
           // alert(event._id)
@@ -279,27 +298,12 @@
             var point= $('#editpoint').val();
             event.title=  price;
             event.description= point;
-            detail = {
-                  id: event.id,
-                  date: event.start,
-                  price: price,
-                  point: point,
-                };  
-
-            // $.ajax({
-            //     url: "{% url 'save_detail' %}",
-            //     data: {
-            //         'detail': JSON.stringify(detail),
-            //     },
-            //     dataType: 'json',
-            //     success: function (data) {
-            //       if (data) {
-            //         alert("Detail updated sucess");
-            //       }
-            //     }
-
-            //   });
-
+            // detail = {
+            //       id: event.id,
+            //       date: event.start,
+            //       price: price,
+            //       point: point,
+            //     };  
 
             $('#price_calendar').fullCalendar('updateEvent', event);
             $('#event_calendar').fullCalendar('unselect');
@@ -374,9 +378,9 @@
         float: center;
       }
     .fc-title{
-      margin-bottom: 30px;
-      color: #b73303;
-    }
+        margin-bottom: 30px;
+        color: #b73303;
+      }
    
    .fc-content{
       height: 100%;   

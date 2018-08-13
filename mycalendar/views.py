@@ -68,7 +68,7 @@ def saveEvent(request):
 
 @csrf_exempt
 def saveDayDetail(request):
-	print("hello there")
+	# print("hello there")
 	if request.is_ajax():
 		message=" happy "
 		detail_json= request.GET.get('details', None)
@@ -88,6 +88,31 @@ def saveDayDetail(request):
 						price=detail['price'], 
 						points=detail['point']
 					)
+		
+	else: 
+		message=" Not ajax "
+	return JsonResponse(message, safe=False)
+	
+@csrf_exempt
+def editDayDetail(request):
+	if request.is_ajax():
+		message=" happy "
+		detail_json= request.GET.get('details', None)
+		# print(detail_json)
+		
+		detail= json.loads(detail_json)
+		try:
+			det= DayDetail.objects.get(date=detail['date'])
+			det.price= detail['price']
+			det.points= detail['point']
+			det.save()
+		except DayDetail.DoesNotExist:
+			DayDetail.objects.create(
+					detail_id=detail['id'], 
+					date=detail['date'], 
+					price=detail['price'], 
+					points=detail['point']
+				)
 		
 	else: 
 		message=" Not ajax "

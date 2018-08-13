@@ -7,5 +7,5 @@ urlpatterns = [
     path('SearchCalendar/', views.SearchCalendar.as_view(), name='search_calendar'),
     path('SaveEvent/', views.saveEvent, name='event_save'),
     path('SaveDetail/', views.saveDayDetail, name='save_detail'),
-    
+    path('EditDetail/', views.editDayDetail, name='edit_detail'),    
 ]

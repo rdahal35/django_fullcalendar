@@ -28,7 +28,8 @@
               }
           }
           return days;
-      }; 
+      };
+      var minDate = moment();
 
       $('#price_calendar').fullCalendar({
         theme: true,
@@ -42,73 +43,86 @@
         defaultDate: new Date(),
         navLinks: true, // can click day/week names to navigate views
 
-        // dayClick: function(date, allday) {
-        //   // var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
-        //   var id="Dtl"+date;
-        //   $("#pricemodal_button").click();
-        //   // var title = prompt("Provide Event Title");
 
-        //   $("#submit").click(function(){
-        //     var price= $('#price').val();
-        //     var point= $('#point').val(); 
-        //     if (price) {
-        //       eventData = {
-        //         id:id,
-        //         title: price,
-        //         start: date,
-        //         allday: true,
-        //         editable: false,
-        //         overlap: false,
-        //         color: '#ffffff',
-        //         description: point,
-        //         // rendering: 'background',
-        //       };            
-        //       // $('#price_calendar').fullCalendar('renderEvent', eventData, true);
-        //       detail = {
-        //           id: id,
-        //           date: date,
-        //           price: price,
-        //           point: point,
-        //         };            
+        selectAllow: function(info) {
+            if (info.start.isBefore(moment()))
+                return false;
+            return true;          
+        },
 
-        //         $.ajax({
-        //         url: "{% url 'save_detail' %}",
+        dayClick: function(date, allday, jsEvent) {
+          // var today = $.fullCalendar.formatDate(new Date(),'yyyy-MM-dd');
+          if(date > minDate){
 
-        //         data: {
-        //             'detail': JSON.stringify(detail),
-        //         },
-        //         dataType: 'json',
-        //         success: function (data) {
-        //           if (data) {
-        //             alert("Detail added sucess");
-        //           }
-        //         }
+            var id="Dtl"+date;
+            $("#pricemodal_button").click();
+            // var title = prompt("Provide Event Title");
 
-        //       });
-        //     }
+            $("#submit").click(function(){
+              var price= $('#price').val();
+              var point= $('#point').val(); 
+              if (price) {
+                eventData = {
+                  id:id,
+                  title: price,
+                  start: date,
+                  allday: true,
+                  editable: false,
+                  overlap: false,
+                  color: '#ffffff',
+                  description: point,
+                  // rendering: 'background',
+                };            
+                $('#price_calendar').fullCalendar('renderEvent', eventData, true);
+                details = {
+                    id: id,
+                    date: date,
+                    price: price,
+                    point: point,
+                  };            
+
+                  $.ajax({
+                  url: "{% url 'edit_detail' %}",
+
+                  data: {
+                      'detail': JSON.stringify(detail),
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                    if (data) {
+                      alert("Detail added sucess");
+                    }
+                  }
+
+                });
+              }
+              
+
+              
+              $('#price_calendar').fullCalendar('unselect');
+
+              date="";
+              title = "";
+              start = "";
+              price="";
+              point="";
+              description='';
+              $(document).ready(function(){
+
+                $('#exit').click();
+                $('#point').val("");
+                $('#price').val("");
+
+              });
+
+
+            });
+          }
+          else{
             
-
-            
-        //     $('#price_calendar').fullCalendar('unselect');
-
-        //     date="";
-        //     title = "";
-        //     start = "";
-        //     price="";
-        //     point="";
-        //     description='';
-        //     $(document).ready(function(){
-
-        //       $('#exit').click();
-        //       $('#point').val("");
-        //       $('#price').val("");
-
-        //     });
-
-
-        //   });
+          }
           
-        // },
+        },
 
         
 
@@ -129,8 +143,6 @@
               id: '{{ detail.id }}',
               title: '{{ detail.price }}',
               start: '{{ detail.date }}',
-              color: '#ffffff',
-              textColor: "#ff0000",
               description: '{{ detail.points }}',
               allday: true,
               overlap: false,
@@ -141,65 +153,105 @@
         ],
 
         eventClick: function(event,  element) {
-          // alert(event._id)
-          $("#editprice_button").click();
-          var price= event.title;
-          // var n = price.indexOf("$");
-          // var m = price.indexOf(":");
-          $('#editprice').val(price);
-          $('#editpoint').val(event.description);
-          $("#editsubmit").click(function(){
-            var price= $('#editprice').val();
-            var point= $('#editpoint').val();
-            event.title=  price;
-            event.description= point;
-            detail = {
-                  id: event.id,
-                  date: event.start,
-                  price: event.title,
-                  point: event.description,
-                };  
 
-            $.ajax({
-                url: "{% url 'save_detail' %}",
+          if(event.start> minDate){
+            // alert(event._id)
+            $("#editprice_button").click();
+            var price= event.title;
+            // var n = price.indexOf("$");
+            // var m = price.indexOf(":");
+            $('#editprice').val(price);
+            $('#editpoint').val(event.description);
 
-                data: {
-                    'detail': JSON.stringify(detail),
-                },
-                dataType: 'json',
-                success: function (data) {
-                  if (data) {
-                    alert("Detail updated sucess");
+            $("#closeEdit").click(function(){
+              $('#event_calendar').fullCalendar('unselect');
+              $('#editexit').click();
+              event=""
+
+            });
+
+            $("#editsubmit").click(function(){
+              var price= $('#editprice').val();
+              var point= $('#editpoint').val();
+              event.title=  price;
+              event.description= point;
+              detail = {
+                    id: event.id,
+                    date: event.start,
+                    price: event.title,
+                    point: event.description,
+                  };  
+
+              $.ajax({
+                  url: "{% url 'edit_detail' %}",
+
+                  data: {
+                      'details': JSON.stringify(detail),
+                  },
+                  dataType: 'json',
+                  success: function (data) {
+                    if (data) {
+                      alert("Detail updated sucess");
+                    }
                   }
-                }
 
-              });
+                });
 
 
-            $('#price_calendar').fullCalendar('updateEvent', event);
-            $('#event_calendar').fullCalendar('unselect');
-            $('#editexit').click();
-            event=""
-          });
+              $('#price_calendar').fullCalendar('updateEvent', event);
+              $('#event_calendar').fullCalendar('unselect');
+              $('#editexit').click();
+              event=""
+            });
+          }
+          else{
+            pass 
+          }
           
         },
 
+        dayRender: function (date, cell) {
+          if(minDate> date){
+            cell.css("background-color", "red");
+          }
+
+        },   
+
         eventRender: function(event, element) { 
+
+
               // element.find('.fc-title').append("<br/><p>Points:" + event.description +"</p>"); 
               element.find(".fc-title").remove();
               // element.find('.fc-title').append("<br/><p>Points:" + event.description +"</p>"); 
-              var new_description =   
-                  '<b>Price:'+event.title+'$<br>'+
-                  '<b>Points:'+event.description+'</b>'
+              var new_description = 
+                  '<div class="fc-title">'+  
+                  '<b style="margin-top:-5px;">Price:'+event.title+'$</b><br><br><br>'+
+                  '<b>Points:'+event.description+'</b>'+
+                  '</div>'
               ;
               element.append(new_description);
 
           },
 
+        viewRender: function(currentView, element){
+            var minDate = moment(),
+            maxDate = moment().add(2,'weeks');
+            // Past
+            if (minDate >= currentView.start && minDate <= currentView.end) {
+              $(".fc-prev-button").prop('disabled', true); 
+              $(".fc-prev-button").addClass('fc-state-disabled');
+
+            }
+            else {
+              $(".fc-prev-button").removeClass('fc-state-disabled'); 
+              $(".fc-prev-button").prop('disabled', false); 
+            }
+        },
 
       });
 
     });
+
 </script>
 <style>
  html, body {
@@ -214,7 +266,7 @@
   }
   .fc-title{
     margin-bottom: 30px;
-    color: #b73303;
+    color: #808000;
   }
  
  .fc-content{
@@ -226,6 +278,11 @@
     position: sticky;
     font-size: 1em;
     font-weight: bold;
+    background-color: #ffffff;
+    border: none;
+  }
+  .fc-day .fc-past {
+    background-color: #000000;
   }
 
 
@@ -250,7 +307,7 @@
             <!-- Modal Header -->
           <div class="modal-header">
             <h4 class="modal-title">Add Price and Points</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <button type="button" class="close" data-dismiss="modal" id="CloseButton">&times;</button>
           </div>
 
           <div class="modal-body">
@@ -286,7 +343,7 @@
 
           <div class="modal-header">
             <h4 class="modal-title">Update Price and Points</h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <button type="button" class="close" data-dismiss="modal" id="closeEdit">&times;</button>
           </div>
 
           <div class="modal-body">
